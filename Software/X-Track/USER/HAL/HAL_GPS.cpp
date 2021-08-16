@@ -2,6 +2,7 @@
 #include "TinyGPSPlus/src/TinyGPS++.h"
 
 #define GPS_SERIAL             CONFIG_GPS_SERIAL
+#define DEBUG_SERIAL           CONFIG_DEBUG_SERIAL
 #define GPS_USE_TRANSPARENT    CONFIG_GPS_USE_TRANSPARENT
 
 static TinyGPSPlus gps;
@@ -46,7 +47,7 @@ bool HAL::GPS_GetInfo(GPS_Info_t* info)
     info->latitude = gps.location.lat();
     info->altitude = gps.altitude.meters();
     info->speed = gps.speed.kmph();
-    info->compass = gps.course.deg();
+    info->course = gps.course.deg();
 
     info->clock.year = gps.date.year();
     info->clock.month = gps.date.month();

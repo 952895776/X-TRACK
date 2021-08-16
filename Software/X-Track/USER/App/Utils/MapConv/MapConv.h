@@ -24,14 +24,14 @@
 #define __MAP_CONV_H
 
 #include <stdint.h>
-#include "../TileSystem/TileSystem.h"
+#include <string.h>
+#include "TileSystem/TileSystem.h"
+
+#define MAP_CONV_DIR_PATH_MAX 16
 
 class MapConv : public Microsoft_MapPoint::TileSystem
 {
 public:
-    MapConv();
-    ~MapConv() {}
-
     typedef struct
     {
         uint32_t tileX;
@@ -39,6 +39,10 @@ public:
         uint32_t subX;
         uint32_t subY;
     } MapTile_t;
+
+public:
+    MapConv();
+    ~MapConv() {}
 
     void SetLevel(int level);
     void SetLevelUp()
@@ -49,55 +53,54 @@ public:
     {
         SetLevel(GetLevel() - 1);
     }
-    void SetMapFilePath(const char* path)
+    static void SetDirPath(const char* path)
     {
-        MapFilePath = path;
-    }
-    void SetFileName(const char* fileName)
-    {
-        MapKeyFileName = fileName;
-    }
-    void SetMapCalibration(double lng, double lat)
-    {
-        MapLng_Calibration = lng;
-        MapLat_Calibration = lat;
-    }
-    int GetMapInfo(
-        double longitude, double latitude,
-        char* path, uint32_t len,
-        uint32_t* mapX, uint32_t* mapY,
-        MapTile_t* mapTile
-    );
-
-    int GetLevel()
-    {
-        return MapLevel;
-    }
-    uint16_t GetMapTileSize()
-    {
-        return MapTileSize;
+        strncpy(dirPath, path, sizeof(dirPath));
     }
 
-    int ConvertMapPath(uint32_t x, uint32_t y, char* path, uint32_t len);
+    static void SetCoordTransformEnable(bool en)
+    {
+        coordTransformEnable = en;
+    }
+
+    static void SetLevelRange(int16_t min, int16_t max)
+    {
+        levelMin = min;
+        levelMax = max;
+    }
+
+    int16_t GetLevel()
+    {
+        return priv.level;
+    }
+    static int16_t GetLevelMax()
+    {
+        return levelMax;
+    }
+    static int16_t GetLevelMin()
+    {
+        return levelMin;
+    }
+
+    void GetMapTile(double longitude, double latitude, MapTile_t* mapTile);
+    void ConvertPosToTile(int32_t x, int32_t y, MapTile_t* mapTile);
+    int ConvertMapPath(int32_t x, int32_t y, char* path, uint32_t len);
     void ConvertMapCoordinate(
         double longitude, double latitude,
-        uint32_t* mapX, uint32_t* mapY
+        int32_t* mapX, int32_t* mapY
     );
-    void ConvertPosToTile(uint32_t x, uint32_t y, MapTile_t* mapTile);
-    void GetMapTile(double longitude, double latitude, MapTile_t* mapTile);
 
-private:
-    const int MapLevelMax;
-    const int MapLevelMin;
-    const uint16_t MapTileSize;
-    double MapLng_Calibration;
-    double MapLat_Calibration;
+protected:
+    struct
+    {
+        int16_t level;
+        uint16_t tileSize;  
+    } priv;
 
-    int MapLevel;
-    const char* MapFilePath;
-    const char* MapKeyFileName;
-
-    uint32_t GetMapSize();
+    static char dirPath[MAP_CONV_DIR_PATH_MAX];
+    static int16_t levelMin;
+    static int16_t levelMax;
+    static bool coordTransformEnable;
 };
 
 #endif

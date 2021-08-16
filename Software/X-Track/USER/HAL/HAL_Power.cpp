@@ -1,6 +1,12 @@
 #include "HAL.h"
 #include "Display/Display.h"
 
+#define BATT_MIN_VOLTAGE            3300
+#define BATT_MAX_VOLTAGE            4200
+#define BATT_FULL_CHARGE_VOLTAGE    4100
+
+#define POWER_ADC                   ADC1
+
 /*上一次操作时间(ms)*/
 static uint32_t Power_LastHandleTime = 0;
 
@@ -15,11 +21,6 @@ static bool Power_IsShutdown = false;
 static volatile uint16_t Power_ADCValue = 0;
 
 static HAL::Power_CallbackFunction_t Power_EventCallback = NULL;
-
-#define BATT_MAX_VOLTAGE    4100
-#define BATT_MIN_VOLTAGE    3300
-
-#define POWER_ADC           ADC1
 
 static void Power_ADC_Init()
 {
@@ -92,7 +93,7 @@ void HAL::Power_Init()
     /*电池检测*/
     Power_ADC_Init();
     pinMode(CONFIG_BAT_DET_PIN, INPUT_ANALOG);
-    pinMode(CONFIG_BAT_CHG_DET_PIN, INPUT_PULLDOWN);
+    pinMode(CONFIG_BAT_CHG_DET_PIN, INPUT_PULLUP);
 
 //    Power_SetAutoLowPowerTimeout(5 * 60);
 //    Power_HandleTimeUpdate();
@@ -195,12 +196,14 @@ void HAL::Power_GetInfo(Power_Info_t* info)
 
     int usage = map(
                     voltage,
-                    BATT_MIN_VOLTAGE, BATT_MAX_VOLTAGE,
+                    BATT_MIN_VOLTAGE, BATT_FULL_CHARGE_VOLTAGE,
                     0, 100
                 );
 
+    __LimitValue(usage, 0, 100);
+
     info->usage = usage;
-    info->isCharging = (usage == 100 ? false : digitalRead(CONFIG_BAT_CHG_DET_PIN));
+    info->isCharging = !digitalRead(CONFIG_BAT_CHG_DET_PIN);
     info->voltage = voltage;
 }
 

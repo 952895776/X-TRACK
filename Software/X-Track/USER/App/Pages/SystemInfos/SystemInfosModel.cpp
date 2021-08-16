@@ -62,7 +62,7 @@ void SystemInfosModel::GetGPSInfo(
         gps.clock.minute,
         gps.clock.second
     );
-    *course = gps.compass;
+    *course = gps.course;
     *speed = gps.speed;
 }
 
@@ -145,8 +145,7 @@ void SystemInfosModel::GetStorageInfo(
     *detect = info.isDetect;
     snprintf(
         usage, len,
-        "%0.1f/%0.1f GB",
-        (info.totalSize - info.freeSize) / 1024.0f / 1024.0f,
-        info.freeSize / 1024.0f / 1024.0f
+        "%0.1f GB",
+        info.totalSizeMB / 1024.0f
     );
 }

@@ -74,12 +74,18 @@ In password mode `lv_textarea_get_text(textarea)` returns the actual text entere
 
 The visibility time can be adjusted with `LV_TEXTAREA_DEF_PWD_SHOW_TIME)` in `lv_conf.h`.
 
+### Text alignment
+
+To align the text in the Text area ` lv_textarea_set_align(textarea, LV_TEXT_ALIGN_LEFT/RIGHT/CENTER)` needs to be used instead of setting the `text_align` style property.
+
+
 ### Accepted characters
 You can set a list of accepted characters with `lv_textarae_set_accepted_chars(textarea, "0123456789.+-")`. 
 Other characters will be ignored. 
 
 ### Max text length
 The maximum number of characters can be limited with `lv_textarea_set_max_length(textarea, max_char_num)`
+
 
 ### Very long texts
 If there is a very long text in the Text area (e. g. > 20k characters), scrolling and drawing might be slow. 
@@ -97,6 +103,8 @@ The event paramter is the text about to be inserted. `lv_textarea_set_insert_rep
 The new text cannot be in a local variable which is destroyed when the event callback exists. `""` means do not insert anything.
 - `LV_EVENT_VALUE_CHANGED` Sent when the content of the text area has been changed. 
 - `LV_EVENT_APPLY` Sent when `LV_KEY_ENTER` is pressed (or(sent) to a one line text area.
+
+See the events of the [Base object](/widgets/obj) too.
 
 Learn more about [Events](/overview/event).
 

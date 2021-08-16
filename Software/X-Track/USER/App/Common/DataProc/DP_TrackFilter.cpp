@@ -9,6 +9,7 @@
 using namespace DataProc;
 
 static MapConv mapConv;
+
 static TrackPointFilter pointFilter;
 
 static bool filterStarted = false;
@@ -65,7 +66,7 @@ static int onNotify(Account* account, TrackFilter_Info_t* info)
 
 static void onPublish(Account* account, HAL::GPS_Info_t* gps)
 {
-    uint32_t mapX, mapY;
+    int32_t mapX, mapY;
     mapConv.ConvertMapCoordinate(
         gps->longitude,
         gps->latitude,
@@ -126,11 +127,7 @@ DATA_PROC_INIT_DEF(TrackFilter)
     account->Subscribe("GPS");
     account->SetEventCallback(onEvent);
 
-    mapConv.SetMapCalibration(
-        CONFIG_MAP_CONV_CALIBRATION_LNG,
-        CONFIG_MAP_CONV_CALIBRATION_LAT
-    );
-    mapConv.SetLevel(15);
+    mapConv.SetLevel(CONFIG_LIVE_MAP_LEVEL_DEFAULT);
 
     static PointVector_t vec;
     veclocationPoints = &vec;

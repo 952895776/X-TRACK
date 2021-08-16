@@ -21,7 +21,7 @@ void LiveMap::onCustomAttrConfig()
 
 void LiveMap::onViewLoad()
 {
-    const uint32_t tileSize = CONFIG_MAP_TILE_SIZE;
+    const uint32_t tileSize = 256;
 
     Model.tileConv.SetTileSize(tileSize);
     Model.tileConv.SetViewSize(
@@ -34,6 +34,11 @@ void LiveMap::onViewLoad()
     uint32_t tileNum = Model.tileConv.GetTileContainer(&rect);
 
     View.Create(root, tileNum);
+    lv_slider_set_range(
+        View.ui.zoom.slider,
+        Model.mapConv.GetLevelMin(),
+        Model.mapConv.GetLevelMax()
+    );
     View.SetMapTile(tileSize, rect.width / tileSize);
 
 #if 0
@@ -77,6 +82,10 @@ void LiveMap::onViewDidLoad()
 void LiveMap::onViewWillAppear()
 {
     Model.Init();
+
+    char theme[16];
+    Model.GetArrowTheme(theme, sizeof(theme));
+    View.SetArrowTheme(theme);
 
     priv.isTrackAvtive = Model.TrackGetFilterActive();
 
@@ -160,7 +169,7 @@ void LiveMap::MapUpdate()
 
     Model.mapConv.SetLevel(mapLevel);
 
-    uint32_t mapX, mapY;
+    int32_t mapX, mapY;
     Model.mapConv.ConvertMapCoordinate(
         gpsInfo.longitude, gpsInfo.latitude,
         &mapX, &mapY
@@ -168,7 +177,7 @@ void LiveMap::MapUpdate()
     Model.tileConv.SetFocusPos(mapX, mapY);
 
     TileConv::Point_t offset;
-    TileConv::Point_t oriPoint = { (int32_t)mapX, (int32_t)mapY };
+    TileConv::Point_t oriPoint = { mapX, mapY };
     Model.tileConv.GetOffset(&offset, &oriPoint);
 
     /* track line */
@@ -194,7 +203,7 @@ void LiveMap::MapUpdate()
     Model.tileConv.GetFocusOffset(&offset);
     lv_coord_t x = offset.x - lv_obj_get_width(img) / 2;
     lv_coord_t y = offset.y - lv_obj_get_height(img) / 2;
-    View.SetImgArrowState(x, y, gpsInfo.compass);
+    View.SetImgArrowState(x, y, gpsInfo.course);
 
     /* map cont */
     Model.tileConv.GetTileContainerOffset(&offset);
@@ -286,7 +295,8 @@ void LiveMap::onEvent(lv_event_t* event)
         if (code == LV_EVENT_VALUE_CHANGED)
         {
             int32_t level = lv_slider_get_value(obj);
-            lv_label_set_text_fmt(instance->View.ui.zoom.labelInfo, "%d/13", level - 2);
+            int32_t levelMax = instance->Model.mapConv.GetLevelMax();
+            lv_label_set_text_fmt(instance->View.ui.zoom.labelInfo, "%d/%d", level + 1, levelMax + 1);
 
             lv_obj_clear_state(instance->View.ui.zoom.cont, LV_STATE_USER_1);
             instance->priv.lastContShowTime = lv_tick_get();

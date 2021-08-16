@@ -1,75 +1,76 @@
-#include "StartUp.h"
+#include "Startup.h"
 
 using namespace Page;
 
-StartUp::StartUp()
+Startup::Startup()
 {
 }
 
-StartUp::~StartUp()
+Startup::~Startup()
 {
 
 }
 
-void StartUp::onCustomAttrConfig()
+void Startup::onCustomAttrConfig()
 {
     SetCustomCacheEnable(false);
     SetCustomLoadAnimType(PageManager::LOAD_ANIM_NONE);
 }
 
-void StartUp::onViewLoad()
+void Startup::onViewLoad()
 {
     Model.Init();
     Model.SetEncoderEnable(false);
     View.Create(root);
-    lv_timer_create(onTimer, 2000, this);
+    lv_timer_t* timer = lv_timer_create(onTimer, 2000, this);
+    lv_timer_set_repeat_count(timer, 1);
 }
 
-void StartUp::onViewDidLoad()
+void Startup::onViewDidLoad()
 {
     lv_obj_fade_out(root, 500, 1500);
 }
 
-void StartUp::onViewWillAppear()
+void Startup::onViewWillAppear()
 {
-    Model.PlayMusic("StartUp");
+    Model.PlayMusic("Startup");
+    lv_anim_timeline_start(View.ui.anim_timeline);
 }
 
-void StartUp::onViewDidAppear()
-{
-
-}
-
-void StartUp::onViewWillDisappear()
+void Startup::onViewDidAppear()
 {
 
 }
 
-void StartUp::onViewDidDisappear()
+void Startup::onViewWillDisappear()
+{
+
+}
+
+void Startup::onViewDidDisappear()
 {
     StatusBar::Appear(true);
 }
 
-void StartUp::onViewDidUnload()
+void Startup::onViewDidUnload()
 {
+    View.Delete();
     Model.SetEncoderEnable(true);
     Model.Deinit();
 }
 
-void StartUp::onTimer(lv_timer_t* timer)
+void Startup::onTimer(lv_timer_t* timer)
 {
-    StartUp* instance = (StartUp*)timer->user_data;
+    Startup* instance = (Startup*)timer->user_data;
 
     instance->Manager->Push("Pages/Dialplate");
-
-    lv_timer_del(timer);
 }
 
-void StartUp::onEvent(lv_event_t* event)
+void Startup::onEvent(lv_event_t* event)
 {
     lv_obj_t* obj = lv_event_get_target(event);
     lv_event_code_t code = lv_event_get_code(event);
-    StartUp* instance = (StartUp*)lv_obj_get_user_data(obj);
+    Startup* instance = (Startup*)lv_obj_get_user_data(obj);
 
     if (obj == instance->root)
     {
